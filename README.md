@@ -1,12 +1,20 @@
 # Restful Booker API tests
 
-[![API tests](https://github.com/Potucky/behave-selenium-login-19-may/actions/workflows/api-tests.yml/badge.svg)](https://github.com/Potucky/behave-selenium-login-19-may/actions/workflows/api-tests.yml)
+[![API tests](https://github.com/Potucky/postman-api-collection-newman/actions/workflows/api-tests.yml/badge.svg)](https://github.com/Potucky/postman-api-collection-newman/actions/workflows/api-tests.yml)
 
 Portfolio project by Vasyl Popovich ([Potucky](https://github.com/Potucky)) for QA Automation, SDET, and Data QA roles.
 
 This is a portfolio demo. It is not code from an employer. It calls the public [Restful Booker](https://restful-booker.herokuapp.com) API and uses only the demo username and password that API publishes (`admin` / `password123`). No private credentials are stored here.
 
-The badge above points at this repository. After a rename, update both URLs in this file.
+[Live test report](https://potucky.github.io/postman-api-collection-newman/)
+
+## What this project demonstrates
+
+- **API contract and schema checks.** JSON responses are checked with JSON Schema (`additionalProperties: false`), then field by field against the values that same run sent.
+- **API functional tests, including negative cases.** A booking is created, read, filtered, replaced, patched, and deleted. Separate requests cover bad credentials, missing and invalid tokens, unknown ids, malformed creates, and writes to an id that was just deleted.
+- **CI test reports.** GitHub Actions runs the collection on pull requests and on pushes to `main`, uploads the JUnit file and the htmlextra HTML report, and publishes that HTML report to GitHub Pages from `main`.
+- **Chained test data with cleanup.** Each later request reads the token and booking ids saved by the request before it. Names are unique per run, and the suite deletes every booking it creates.
+- **Collection as code.** The Postman collection is generated from `scripts/collection.js`. CI rejects a committed JSON file that does not match the generator.
 
 ## What this demonstrates
 
@@ -35,6 +43,7 @@ The badge above points at this repository. After a rename, update both URLs in t
 ```text
 .
 ├── .github/workflows/api-tests.yml          # install, drift check, Newman, upload report
+├── .github/workflows/pages.yml              # on main: Newman, then GitHub Pages
 ├── collections/
 │   └── restful-booker.postman_collection.json   # file you import into Postman
 ├── environments/
@@ -121,6 +130,8 @@ The HTML report skips `Cookie` and `Authorization` headers and hides the auth re
 2. `npm run build`, then `git diff --exit-code` on the collection, so a hand-edit of the JSON cannot drift from `scripts/collection.js`.
 3. `npm run test:run` (Newman).
 4. Upload `reports/newman-report.html` and `reports/junit.xml` as the artifact **newman-report** (kept 14 days), including when the run fails.
+
+[`.github/workflows/pages.yml`](.github/workflows/pages.yml) runs on pushes to `main`. It repeats that install, drift check, and Newman run, then publishes the HTML report with `actions/upload-pages-artifact` and `actions/deploy-pages`. The [Live test report](https://potucky.github.io/postman-api-collection-newman/) is an index page that links to `newman-report.html`. The repository Pages source has to be **GitHub Actions** before that address serves a report. The workflow does not change that setting.
 
 ## Sample output
 
@@ -225,3 +236,7 @@ A cold start on the public host can make the first call slower. The client waits
 ## Changing the tests
 
 Edit `scripts/collection.js` or the files in `schemas/`, then run `npm run build`. That rewrites `collections/restful-booker.postman_collection.json`. Commit both. CI rejects a collection JSON that does not match the generator.
+
+## Author
+
+Vasyl Popovich, QA Automation Engineer, Miami, FL. GitHub: https://github.com/Potucky
