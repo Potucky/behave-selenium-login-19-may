@@ -1,0 +1,12 @@
+{
+  "description": "Failed POST /auth response. The demo uses HTTP 200 with this body instead of 401.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["reason"],
+  "properties": {
+    "reason": {
+      "type": "string",
+      "enum": ["Bad credentials"]
+    }
+  }
+}
