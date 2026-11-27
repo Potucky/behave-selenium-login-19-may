@@ -1,0 +1,85 @@
+# Runs the API tests on each push to main and publishes the Newman HTML
+# report to GitHub Pages.
+#
+# The repository Pages source has to be GitHub Actions before the deploy
+# step can succeed. This workflow does not change that setting. It also
+# does not call actions/configure-pages, which would create the Pages site.
+
+name: Publish test report
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Test and publish report
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check the committed collection matches the generator
+        run: |
+          npm run build
+          git diff --exit-code -- collections/restful-booker.postman_collection.json
+
+      - name: Run the collection
+        run: npm run test:run
+
+      - name: Assemble the Pages site
+        run: |
+          mkdir -p site
+          cp reports/newman-report.html site/newman-report.html
+          cat > site/index.html <<'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>Restful Booker API tests</title>
+            <style>
+              body { font-family: system-ui, sans-serif; max-width: 40rem; margin: 3rem auto; padding: 0 1.25rem; line-height: 1.5; color: #1a1a1a; }
+              a { color: #0b57d0; }
+            </style>
+          </head>
+          <body>
+            <h1>Restful Booker API tests</h1>
+            <p>Portfolio demo by Vasyl Popovich. This is not employer code. The report below is the Newman HTML report from the latest push to <code>main</code>.</p>
+            <p><a href="newman-report.html">Open the Newman HTML report</a></p>
+            <p><a href="https://github.com/Potucky/postman-api-collection-newman">Source repository</a></p>
+          </body>
+          </html>
+          EOF
+
+      - name: Upload the Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
