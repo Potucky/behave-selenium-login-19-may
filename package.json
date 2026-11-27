@@ -1,0 +1,18 @@
+{
+  "name": "postman-api-collection-newman",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Portfolio demo: Postman collection and Newman CI for the public Restful Booker API.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node scripts/build-collection.js",
+    "test": "npm run build && node scripts/run-newman.js",
+    "test:run": "node scripts/run-newman.js"
+  },
+  "devDependencies": {
+    "newman": "6.2.3",
+    "newman-reporter-htmlextra": "1.23.1"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "description": "GET /booking search results. Each row is an id only.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["bookingid"],
+    "properties": {
+      "bookingid": {
+        "type": "integer",
+        "minimum": 1
+      }
+    }
+  }
+}
